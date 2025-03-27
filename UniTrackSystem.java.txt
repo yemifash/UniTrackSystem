@@ -1,0 +1,129 @@
+import java.util.Scanner;
+
+public class UniversityTrackingSystem {
+    public static void main(String[] args) {
+        int totalStudents;
+        StudentList studentList;
+
+        System.out.print("Enter the total number of students: ");
+        totalStudents = EasyScanner.nextInt(); // User inputs total capacity
+        studentList = new StudentList(totalStudents); // Initialize student list
+
+        StudentFileHandler.readRecords(studentList); // Load existing records, if any
+
+        char choice;
+        do {
+            System.out.println();
+            System.out.println("1. Add Student");
+            System.out.println("2. Display Students");
+            System.out.println("3. Remove Student");
+            System.out.println("4. Calculate Average Marks");
+            System.out.println("5. Display Results");
+            System.out.println("6. Save and Quit");
+            System.out.println();
+            System.out.print("Enter choice (1-6): ");
+            choice = EasyScanner.nextChar();
+            System.out.println();
+
+            switch (choice) {
+                case '1':
+                    addHandler(totalStudents, studentList);
+                    break;
+                case '2':
+                    displayHandler(studentList);
+                    break;
+                case '3':
+                    removeHandler(totalStudents, studentList);
+                    break;
+                case '4':
+                    calculateAverageHandler(studentList);
+                    break;
+                case '5':
+                    displayResultsHandler(studentList);
+                    break;
+                case '6':
+                    saveAndQuitHandler(totalStudents, studentList);
+                    break;
+                default:
+                    System.out.println("Enter a valid choice (1-6 only).");
+            }
+        } while (choice != '6');
+    }
+
+    static void addHandler(int totalStudents, StudentList studentList) {
+        System.out.print("Enter student name: ");
+        String nameEntered = EasyScanner.nextString();
+        System.out.print("Enter student ID: ");
+        int idEntered = EasyScanner.nextInt();
+
+        if (studentList.isFull()) {
+            System.out.println("The student list is full. Cannot add more students.");
+        } else if (studentList.search(idEntered) != null) {
+            System.out.println("Student ID " + idEntered + " already exists.");
+        } else {
+            Student newStudent = new Student(nameEntered, idEntered);
+            System.out.println("Enter module details (type 'done' to finish):");
+            while (true) {
+                System.out.print("Module name: ");
+                String moduleName = EasyScanner.nextString();
+                if (moduleName.equalsIgnoreCase("done")) break;
+
+                System.out.print("Marks for " + moduleName + ": ");
+                int marks = EasyScanner.nextInt();
+                newStudent.addModule(moduleName, marks);
+            }
+            studentList.addStudent(newStudent);
+            System.out.println("Student " + nameEntered + " successfully added.");
+        }
+    }
+
+    static void displayHandler(StudentList studentList) {
+        if (studentList.isEmpty()) {
+            System.out.println("No students in the list.");
+        } else {
+            System.out.println("ID\tName\tModules and Marks");
+            for (int i = 1; i <= studentList.getTotal(); i++) {
+                Student student = studentList.getStudent(i);
+                System.out.print(student.getId() + "\t" + student.getName() + "\t");
+                student.displayModules();
+            }
+        }
+    }
+
+    static void removeHandler(int totalStudents, StudentList studentList) {
+        System.out.print("Enter student ID to remove: ");
+        int idEntered = EasyScanner.nextInt();
+        if (studentList.search(idEntered) == null) {
+            System.out.println("Student ID " + idEntered + " does not exist.");
+        } else {
+            studentList.removeStudent(idEntered);
+            System.out.println("Student ID " + idEntered + " successfully removed.");
+        }
+    }
+
+    static void calculateAverageHandler(StudentList studentList) {
+        if (studentList.isEmpty()) {
+            System.out.println("No students to calculate averages for.");
+        } else {
+            for (int i = 1; i <= studentList.getTotal(); i++) {
+                Student student = studentList.getStudent(i);
+                System.out.println("Student " + student.getName() + "'s Average Marks: " + student.calculateAverage());
+            }
+        }
+    }
+
+    static void displayResultsHandler(StudentList studentList) {
+        if (studentList.isEmpty()) {
+            System.out.println("No students to display results for.");
+        } else {
+            for (int i = 1; i <= studentList.getTotal(); i++) {
+                Student student = studentList.getStudent(i);
+                System.out.println("Student " + student.getName() + "'s Result: " + student.evaluateResult());
+            }
+        }
+    }
+
+    static void saveAndQuitHandler(int totalStudents, StudentList studentList) {
+        StudentFileHandler.saveRecords(totalStudents, studentList);
+    }
+}
